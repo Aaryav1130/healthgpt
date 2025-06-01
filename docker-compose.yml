@@ -1,0 +1,38 @@
+version: "3.9"
+
+services:
+  backend:
+    build: ./backend
+    ports:
+      - "8000:8000"
+    environment:
+      - OLLAMA_BASE_URL=http://host.docker.internal:11434
+      - EMBEDDING_DEVICE=cpu
+    volumes:
+      - ./vector_store:/app/vector_store
+      - ./data:/app/data
+    restart: unless-stopped
+    networks:
+      - healthgpt-net
+
+  frontend:
+    build: ./frontend
+    ports:
+      - "3000:80"
+    depends_on:
+      - backend
+    networks:
+      - healthgpt-net
+
+  prometheus:
+    image: prom/prometheus:v2.55.0
+    ports:
+      - "9090:9090"
+    volumes:
+      - ./infra/prometheus/prometheus.yml:/etc/prometheus/prometheus.yml
+    networks:
+      - healthgpt-net
+
+networks:
+  healthgpt-net:
+    driver: bridge
