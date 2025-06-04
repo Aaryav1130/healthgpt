@@ -1,0 +1,14 @@
+[
+  {
+    "question": "What are the symptoms of Type 2 Diabetes?",
+    "ground_truth": "Common symptoms include increased thirst, frequent urination, unexplained weight loss, fatigue, blurred vision.",
+    "contexts": [],
+    "generated_answer": ""
+  },
+  {
+    "question": "What is the recommended treatment for hypertension?",
+    "ground_truth": "Treatment includes lifestyle changes (diet, exercise) and medications such as ACE inhibitors, beta-blockers, or diuretics.",
+    "contexts": [],
+    "generated_answer": ""
+  }
+]
