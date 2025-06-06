@@ -1,6 +1,6 @@
 import ReactMarkdown from "react-markdown";
 import { FileText } from "lucide-react";
-import { ChatMessage } from "../hooks/useStreamingChat";
+import type { ChatMessage } from "../hooks/useStreamingChat";
 
 interface Props {
   message: ChatMessage;

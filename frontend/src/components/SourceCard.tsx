@@ -1,4 +1,4 @@
-import { Source } from "../hooks/useStreamingChat";
+import type { Source } from "../hooks/useStreamingChat";
 
 interface Props {
   source: Source;
