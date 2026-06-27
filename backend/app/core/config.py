@@ -41,10 +41,7 @@ class Settings(BaseSettings):
     chunk_overlap: int = 64
 
     # Monitoring
-    prometheus_port: int = 8001
-
-    # Groq (for deployment)
-    groq_api_key: str = ""
+    prometheus_port: int = 8000
 
 @lru_cache()
 def get_settings() -> Settings:
