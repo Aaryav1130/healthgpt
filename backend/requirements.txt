@@ -21,5 +21,3 @@ prometheus-client
 structlog
 pytest
 pytest-asyncio
-groq
-langchain-groq
