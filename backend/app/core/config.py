@@ -43,6 +43,9 @@ class Settings(BaseSettings):
     # Monitoring
     prometheus_port: int = 8001
 
+    # Groq (for deployment)
+    groq_api_key: str = ""
+
 @lru_cache()
 def get_settings() -> Settings:
     return Settings()
