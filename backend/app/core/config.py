@@ -40,6 +40,9 @@ class Settings(BaseSettings):
     chunk_size: int = 512
     chunk_overlap: int = 64
 
+    # Monitoring
+    prometheus_port: int = 8001
+
 @lru_cache()
 def get_settings() -> Settings:
     return Settings()
