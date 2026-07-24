@@ -40,6 +40,9 @@ class Settings(BaseSettings):
     chunk_size: int = 512
     chunk_overlap: int = 64
 
+    # Groq (production LLM)
+    groq_api_key: str = ""
+    
     # Monitoring
     prometheus_port: int = 8000
 
