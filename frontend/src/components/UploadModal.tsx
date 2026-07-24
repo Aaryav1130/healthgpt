@@ -1,5 +1,5 @@
 import { useRef, useState } from "react";
-import { Upload, X, FileText } from "lucide-react";
+import { X, FileText } from "lucide-react";
 import { uploadPDF, getIndexStatus } from "../api/client";
 
 interface Props {
