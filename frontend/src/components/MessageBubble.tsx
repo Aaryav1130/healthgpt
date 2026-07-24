@@ -1,6 +1,6 @@
 import ReactMarkdown from "react-markdown";
 import { FileText } from "lucide-react";
-import type { ChatMessage } from "../hooks/useStreamingChat";
+import type { ChatMessage, Source } from "../hooks/useStreamingChat";
 
 interface Props {
   message: ChatMessage;
@@ -33,7 +33,7 @@ export default function MessageBubble({ message }: Props) {
               <FileText size={11} /> Sources
             </div>
             <div style={{ display: "flex", flexWrap: "wrap", gap: "6px" }}>
-              {message.sources.map((s, j) => (
+              {message.sources.map((s: Source, j: number) => (
                 <span key={j} style={{
                   fontSize: "11px", padding: "2px 8px", borderRadius: "4px",
                   background: "#0f172a", color: "#94a3b8", border: "1px solid #334155"
