@@ -21,7 +21,7 @@ class Settings(BaseSettings):
     llm_max_tokens: int = 1024
 
     # Embeddings
-    embedding_model: str = "BAAI/bge-small-en-v1.5"
+    embedding_model: str = "all-MiniLM-L6-v2"
     embedding_device: str = "cpu"
 
     # Reranker
