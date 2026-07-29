@@ -37,8 +37,8 @@ class Settings(BaseSettings):
     top_k_rerank: int = 5
 
     # Chunking
-    chunk_size: int = 512
-    chunk_overlap: int = 64
+    chunk_size: int = 256
+    chunk_overlap: int = 32
 
     # Groq (production LLM)
     groq_api_key: str = ""
