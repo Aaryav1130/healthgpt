@@ -30,47 +30,32 @@ def get_embedding_model() -> SentenceTransformer:
     return _embedding_model
 
 def embed_texts(texts: List[str]) -> np.ndarray:
-    """
-    Use Together AI API for fast cloud embeddings,
-    fallback to local model if no API key.
-    """
-    together_key = os.getenv("TOGETHER_API_KEY", "")
-    
-    if together_key:
-        return _embed_together(texts, together_key)
+    hf_key = os.getenv("HF_API_TOKEN", "")
+    if hf_key:
+        return _embed_hf_api(texts, hf_key)
     else:
         return _embed_local(texts)
 
-def _embed_together(texts: List[str], api_key: str) -> np.ndarray:
-    """Together AI embeddings — instant, no GPU needed."""
+def _embed_hf_api(texts: List[str], api_key: str) -> np.ndarray:
+    """HuggingFace Inference API — free, no GPU needed."""
     import httpx
-    import time
-    
+
     all_embeddings = []
-    batch_size = 100  # Together AI allows large batches
-    
+    batch_size = 32
+
     for i in range(0, len(texts), batch_size):
         batch = texts[i:i + batch_size]
-        
         response = httpx.post(
-            "https://api.together.xyz/v1/embeddings",
-            headers={
-                "Authorization": f"Bearer {api_key}",
-                "Content-Type": "application/json"
-            },
-            json={
-                "model": "togethercomputer/m2-bert-80M-8k-retrieval",
-                "input": batch
-            },
+            "https://api-inference.huggingface.co/models/BAAI/bge-small-en-v1.5",
+            headers={"Authorization": f"Bearer {api_key}"},
+            json={"inputs": batch, "options": {"wait_for_model": True}},
             timeout=60.0
         )
         response.raise_for_status()
-        data = response.json()
-        batch_embeddings = [item["embedding"] for item in data["data"]]
+        batch_embeddings = response.json()
         all_embeddings.extend(batch_embeddings)
-        
+
     embeddings = np.array(all_embeddings, dtype=np.float32)
-    # Normalize for cosine similarity
     norms = np.linalg.norm(embeddings, axis=1, keepdims=True)
     embeddings = embeddings / np.maximum(norms, 1e-8)
     return embeddings
