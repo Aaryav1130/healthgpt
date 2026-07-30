@@ -1,19 +1,18 @@
-import os
 import faiss
 import numpy as np
 import json
+import os
+import pickle
 from pathlib import Path
 from typing import List, Dict
 from sentence_transformers import SentenceTransformer
 from rank_bm25 import BM25Okapi
-import pickle
 
 from app.core.config import settings
 from app.core.logging import logger
 from app.utils.pdf_loader import extract_text_from_pdf
 from app.utils.chunker import chunk_documents
 
-# Global state (loaded once at startup)
 _faiss_index: faiss.IndexFlatIP = None
 _metadata: List[Dict] = []
 _bm25_index: BM25Okapi = None
@@ -30,38 +29,7 @@ def get_embedding_model() -> SentenceTransformer:
     return _embedding_model
 
 def embed_texts(texts: List[str]) -> np.ndarray:
-    hf_key = os.getenv("HF_API_TOKEN", "")
-    if hf_key:
-        return _embed_hf_api(texts, hf_key)
-    else:
-        return _embed_local(texts)
-
-def _embed_hf_api(texts: List[str], api_key: str) -> np.ndarray:
-    """HuggingFace Inference API — free, no GPU needed."""
-    import httpx
-
-    all_embeddings = []
-    batch_size = 32
-
-    for i in range(0, len(texts), batch_size):
-        batch = texts[i:i + batch_size]
-        response = httpx.post(
-            "https://api-inference.huggingface.co/models/BAAI/bge-small-en-v1.5",
-            headers={"Authorization": f"Bearer {api_key}"},
-            json={"inputs": batch, "options": {"wait_for_model": True}},
-            timeout=60.0
-        )
-        response.raise_for_status()
-        batch_embeddings = response.json()
-        all_embeddings.extend(batch_embeddings)
-
-    embeddings = np.array(all_embeddings, dtype=np.float32)
-    norms = np.linalg.norm(embeddings, axis=1, keepdims=True)
-    embeddings = embeddings / np.maximum(norms, 1e-8)
-    return embeddings
-
-def _embed_local(texts: List[str]) -> np.ndarray:
-    """Local model fallback."""
+    """Local embeddings — simple and reliable."""
     model = get_embedding_model()
     embeddings = model.encode(
         texts,
@@ -74,7 +42,7 @@ def _embed_local(texts: List[str]) -> np.ndarray:
 
 def build_faiss_index(embeddings: np.ndarray) -> faiss.IndexFlatIP:
     dim = embeddings.shape[1]
-    index = faiss.IndexFlatIP(dim)  # Inner Product = cosine similarity (normalized)
+    index = faiss.IndexFlatIP(dim)
     index.add(embeddings)
     return index
 
@@ -106,30 +74,22 @@ def ingest_pdf(pdf_path: str) -> Dict:
 
     logger.info("Starting ingestion", file=pdf_path)
 
-    # Step 1: Extract
     pages = extract_text_from_pdf(pdf_path)
-
-    # Step 2: Chunk
     chunks = chunk_documents(pages)
     texts = [c["text"] for c in chunks]
 
-    # Step 3: Embed
     logger.info("Embedding chunks", count=len(chunks))
     embeddings = embed_texts(texts)
 
-    # Step 4: Build/Update FAISS
     new_index = build_faiss_index(embeddings)
 
-    # Step 5: Build BM25
     tokenized = [t.lower().split() for t in texts]
     bm25 = BM25Okapi(tokenized)
 
-    # Replace global state
     _faiss_index = new_index
     _metadata = chunks
     _bm25_index = bm25
 
-    # Step 6: Persist
     save_index(new_index, chunks, bm25)
 
     return {
