@@ -26,7 +26,7 @@ export default function App() {
     setInput("");
   };
 
-  const handleUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+const handleUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
     setIsUploading(true);
@@ -35,8 +35,12 @@ export default function App() {
       const status = await getIndexStatus();
       setIndexStatus(status);
       alert(`✅ Ingested "${result.filename}" — ${result.chunks_created} chunks created`);
-    } catch (err) {
-      alert("❌ Upload failed.");
+    } catch (err: any) {
+      if (err.code === 'ECONNABORTED') {
+        alert("⏳ Upload timed out — PDF is still processing on server. Wait 2 minutes then ask a question to verify it worked.");
+      } else {
+        alert("❌ Upload failed. Check your connection.");
+      }
     } finally {
       setIsUploading(false);
       e.target.value = "";
