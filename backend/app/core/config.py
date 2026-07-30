@@ -21,7 +21,7 @@ class Settings(BaseSettings):
     llm_max_tokens: int = 1024
 
     # Embeddings
-    embedding_model: str = "all-MiniLM-L6-v2"
+    embedding_model: str = "paraphrase-MiniLM-L3-v2"
     embedding_device: str = "cpu"
 
     # Reranker
@@ -32,9 +32,9 @@ class Settings(BaseSettings):
     faiss_metadata_path: str = "./vector_store/metadata.json"
 
     # Retrieval
-    top_k_dense: int = 10
-    top_k_bm25: int = 10
-    top_k_rerank: int = 5
+    top_k_dense: int = 5
+    top_k_bm25: int = 5
+    top_k_rerank: int = 3
 
     # Chunking
     chunk_size: int = 256
